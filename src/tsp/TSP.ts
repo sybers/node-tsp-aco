@@ -1,11 +1,11 @@
-import Graph from "../graph/Graph";
-import Ant from "./Ant";
+import { Graph } from "../graph";
+import { Ant } from "./Ant";
 
 /**
  * The TSP class represents a Traveling Salesman Problem instance,
  * using a given graph and its parameters.
  */
-export default class TSP {
+export  class TSP {
     private readonly graph: Graph;
     private readonly antsNumber: number;
     private readonly generationsNumber: number;
@@ -31,12 +31,14 @@ export default class TSP {
             const bestAntOfGeneration: Ant|null = this.updateAntsPositions(ants);
             this.updatePheromones(ants);
 
-            if (bestAnt === null || (bestAntOfGeneration as Ant).eval() < bestAnt.eval()) {
+            if (bestAnt === null || (bestAntOfGeneration as Ant).evaluate() < bestAnt.evaluate()) {
                 bestAnt = bestAntOfGeneration;
             }
+
+            console.log((bestAntOfGeneration as Ant).evaluate());
         }
 
-        return (bestAnt as Ant).eval();
+        return (bestAnt as Ant).evaluate();
     }
 
     /**
@@ -57,19 +59,18 @@ export default class TSP {
         let bestAnt: Ant|null = null;
 
         // make all ants travel on the graph one by one
-        let i = 0;
         for (const ant of ants) {
             // walk the graph until all cities are visited
-            console.log(`Ant at index ${i} is now travelling\n\n`);
-            while (ant.notFinished()) {
+            // console.log(`Ant at index ${i} is now travelling\n`);
+            while (!ant.isTravelFinished()) {
+                // console.log(ant.getTour());
+                // console.log("\n");
                 ant.travel();
             }
 
-            if (bestAnt === null || ant.eval() < bestAnt.eval()) {
+            if (bestAnt === null || ant.evaluate() < bestAnt.evaluate()) {
                 bestAnt = ant;
             }
-
-            ++i;
         }
         return bestAnt;
     }

@@ -29,7 +29,7 @@ export class Edge implements IHash {
     }
 
     public hash(): number {
-        return this.first.hash() + this.second.hash();
+        return (2 * this.first.hash()) + this.second.hash();
     }
 
     public toString(): string {

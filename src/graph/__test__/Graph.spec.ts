@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import "mocha";
-import { Edge, Graph, Vertex } from "../index";
+import { Graph } from "../index";
 
 describe("Graph", () => {
     describe("isEmpty", () => {
@@ -11,7 +11,7 @@ describe("Graph", () => {
 
         it("should return false if the graph has some elements", () => {
             const graph = new Graph(0.1, 1, 1);
-            graph.addVertex(new Vertex("name", 0, 0));
+            graph.addVertex("name", 0, 0);
             expect(graph.isEmpty()).to.be.false;
         });
     });
@@ -22,8 +22,8 @@ describe("Graph", () => {
             expect(g.getTotalVertices()).to.equal(0);
 
             const g2 = new Graph(0.1, 1, 1);
-            g2.addVertex(new Vertex("A", 0, 0));
-            g2.addVertex(new Vertex("B", 1, 1));
+            g2.addVertex("A", 0, 0);
+            g2.addVertex("B", 1, 1);
             expect(g2.getTotalVertices()).to.equal(2);
         });
     });
@@ -36,27 +36,40 @@ describe("Graph", () => {
 
             // a graph with one edge
             const g2 = new Graph(0.1, 1, 1);
-            const v1: Vertex = new Vertex("A", 0, 0);
-            const v2: Vertex = new Vertex("B", 1, 1);
 
-            g2.addVertex(v1);
-            g2.addVertex(v2);
+            const v1 = g2.addVertex("A", 0, 0);
+            const v2 = g2.addVertex("B", 1, 1);
 
-            g2.addEdge(new Edge(v1, v2));
+            g2.addEdge(v1, v2);
             expect(g2.getTotalEdges()).to.equal(1);
         });
 
         it("should skip an edge that already exists", () => {
             const g = new Graph(0.1, 1, 1);
-            const v1: Vertex = new Vertex("A", 0, 0);
-            const v2: Vertex = new Vertex("B", 1, 1);
 
-            g.addVertex(v1);
-            g.addVertex(v2);
+            const v1 = g.addVertex("A", 0, 0);
+            const v2 = g.addVertex("B", 1, 1);
 
-            g.addEdge(new Edge(v1, v2));
-            g.addEdge(new Edge(v2, v1)); // creating the same edge in the other way !
+            g.addEdge(v1, v2);
+
+            // as the graph is not oriented, creating the same edge the other way won't do anything...
+            g.addEdge(v2, v1);
             expect(g.getTotalEdges()).to.equal(1);
         });
+    });
+
+    describe("getEdges", () => {
+       it("should return the edges connected to a vertex", () => {
+           const g = new Graph(0.1, 1, 1);
+
+           const v1 = g.addVertex("A", 0, 0);
+           const v2 = g.addVertex("B", 1, 1);
+
+           g.addEdge(v1, v2);
+
+           // the two edges are connected, so both have one edge
+           expect(g.getEdges(v1).length).to.equal(1);
+           expect(g.getEdges(v2).length).to.equal(1);
+       }) ;
     });
 });
