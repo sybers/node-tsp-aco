@@ -1,5 +1,5 @@
 import IHash from "./IHash";
-import Vertex from "./Vertex";
+import { Vertex } from "./Vertex";
 
 export class Edge implements IHash {
     protected pheromone: number;

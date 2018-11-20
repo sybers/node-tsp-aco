@@ -1,6 +1,4 @@
-import Edge from "./graph/Edge";
-import Graph from "./graph/Graph";
-import Vertex from "./graph/Vertex";
+import { Edge, Graph, Vertex } from "./graph";
 
 const main = () => {
     // test parameters

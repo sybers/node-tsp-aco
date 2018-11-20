@@ -1,7 +1,6 @@
 import { expect } from "chai";
 import "mocha";
-import Edge from "../Edge";
-import Vertex from "../Vertex";
+import { Edge, Vertex } from "../index";
 
 const createEdgeStub = () => {
     const v1: Vertex = new Vertex("A", 0, 0);

@@ -1,8 +1,6 @@
 import { expect } from "chai";
 import "mocha";
-import Graph from "../Graph";
-import Vertex from "../Vertex";
-import Edge from "../Edge";
+import { Edge, Graph, Vertex } from "../index";
 
 describe("Graph", () => {
     describe("isEmpty", () => {
