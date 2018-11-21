@@ -14,6 +14,9 @@ export class Ant {
 
         this.currentVertex = this.graph.getRandomVertex(); // randomly place ant on the graph
         this.visitedVertices = new Set<Vertex>();
+
+        // add the initial vertex to the tabu list
+        this.visitedVertices.add(this.currentVertex);
         this.tour = [this.currentVertex]; // initialize the tour with the current vertex
     }
 
@@ -25,7 +28,7 @@ export class Ant {
 
         // if the tour is complete, head back to the first city
         if (this.graph.getTotalVertices() === this.tour.length) {
-            this.tour.push(this.tour[0]); // update the visited cities on the tour
+            this.tour.push(this.tour[0]);
             return;
         }
 
@@ -36,9 +39,13 @@ export class Ant {
         this.currentVertex = nextVertex;
     }
 
+    /**
+     * Get the ant tour
+     * @return Vertex[] ordered visited vertices
+     */
     public getTour(): Vertex[] {
         if (!this.isTravelFinished()) {
-            // throw new Error("Cannot return an incomplete tour.");
+            throw new Error("Cannot return an incomplete tour.");
         }
 
         return Object.assign([], this.tour);
@@ -72,40 +79,32 @@ export class Ant {
         const probs = this.probabilities();
         const r = Math.random();
 
-        // console.log(`Random probability is : ${r}`);
         for (const tuple of probs) {
-            // console.log(`\tTuple -> ${tuple}`)
             if (r <= tuple[0]) {
-                // console.log(`\t\tChosen Vertex is : ${tuple[1]}`)
-                return tuple[1].getSecond();
+                return tuple[1].getOppositeEnd(this.currentVertex);;
             }
         }
 
-        console.log(`Random probability is : ${r}`);
         console.log(probs);
-
         throw new Error("Unable to select an edge...");
     }
 
     // TODO : calculate list of probabilities
     private probabilities(): Array<Tuple<number, Edge>> {
-        const denominator: number = this.denominator();
         const probabilities: Array<Tuple<number, Edge>> = [];
 
-        const edgesList: Edge[] = this.graph.getEdges(this.currentVertex);
-        for (const edge of edgesList) {
-            if (this.visitedVertices.has(edge.getSecond())) {
-                // console.log("Skipping already visited vertex");
-                continue;
-            }
+        // retreive allowed edges, ie. the ones leading to a vertex that has not been visited
+        const allowedEdges: Edge[] =
+            this.graph.getEdgesForVertex(this.currentVertex)
+            .filter((e) => !this.visitedVertices.has(e.getOppositeEnd(this.currentVertex)));
 
-            let probability = null;
-            if (probabilities.length === 0) {
-                probability = this.desirability(edge) / denominator;
-            } else {
-                const i: number = probabilities.length - 1;
-                probability = probabilities[i][0] + this.desirability(edge) / denominator;
-            }
+        const denominator: number = this.denominator(allowedEdges);
+
+        for (const edge of allowedEdges) {
+            // accumulate probabilities to be able to iterate them
+            const probability =
+                (probabilities.length === 0 ? 0 : probabilities[probabilities.length - 1][0]) +
+                this.desirability(edge) / denominator;
 
             const tuple: Tuple<number, Edge> = [
                 probability,
@@ -118,23 +117,21 @@ export class Ant {
         return probabilities;
     }
 
-    // TODO : calculate denominator
-    private denominator(): number {
-        const edgesList: Edge[] = this.graph.getEdges(this.currentVertex);
-        let denominator: number = 0.0;
-
-        for (const edge of edgesList) {
-            if (!this.visitedVertices.has(edge.getSecond())) {
-                denominator += this.desirability(edge);
-            }
-        }
-
-        return denominator;
+    /**
+     * Calculate the sum of probabilities for the given edges
+     * @param edges
+     */
+    private denominator(edges: Edge[]): number {
+        return edges.reduce((acc, v) => acc + this.desirability(v), 0);
     }
 
-    // TODO  calculate desirability
+    /**
+     * Calculate the desirability for a given edge
+     * @param edge
+     */
     private desirability(edge: Edge): number {
         const pheromone: number = Math.pow(edge.getPheromone(), this.graph.getAlpha());
+
         const distance: number = Vertex.distance(edge.getFirst(), edge.getSecond());
         const distanceValue: number = Math.pow(1 / distance, this.graph.getBeta());
         return pheromone * distanceValue;

@@ -33,9 +33,8 @@ export  class TSP {
 
             if (bestAnt === null || (bestAntOfGeneration as Ant).evaluate() < bestAnt.evaluate()) {
                 bestAnt = bestAntOfGeneration;
+                console.log("Found better score ! (", (bestAnt as Ant).evaluate(), ")");
             }
-
-            console.log((bestAntOfGeneration as Ant).evaluate());
         }
 
         return (bestAnt as Ant).evaluate();
@@ -81,6 +80,7 @@ export  class TSP {
      */
     private updatePheromones(ants: Ant[]): void {
         for (const ant of ants) {
+            // console.log("Updating pheromones...");
             this.graph.updatePheromone(ant);
         }
     }

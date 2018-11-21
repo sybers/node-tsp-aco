@@ -58,18 +58,21 @@ describe("Graph", () => {
         });
     });
 
-    describe("getEdges", () => {
-       it("should return the edges connected to a vertex", () => {
-           const g = new Graph(0.1, 1, 1);
+    describe("getEdgesForVertex", () => {
+        it("should return the edges connected to a vertex", () => {
+            const g = new Graph(0.1, 1, 1);
 
-           const v1 = g.addVertex("A", 0, 0);
-           const v2 = g.addVertex("B", 1, 1);
+            const a = g.addVertex("A", 0, 0);
+            const b = g.addVertex("B", 0, 1);
+            const c = g.addVertex("C", 1, 0);
+            const d = g.addVertex("D", 1, 1);
 
-           g.addEdge(v1, v2);
+            g.addEdge(a, b);
+            g.addEdge(a, c);
+            g.addEdge(b, c);
+            g.addEdge(c, d);
 
-           // the two edges are connected, so both have one edge
-           expect(g.getEdges(v1).length).to.equal(1);
-           expect(g.getEdges(v2).length).to.equal(1);
-       }) ;
+            expect(g.getEdgesForVertex(a).length).to.equal(2);
+        });
     });
 });

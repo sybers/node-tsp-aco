@@ -18,7 +18,6 @@ export class Graph {
     private readonly evaporationRate: number;
     private readonly alpha: number;
     private readonly beta: number;
-    private readonly isOriented: boolean;
 
     /**
      * Create a new graph with the given parameters
@@ -31,7 +30,6 @@ export class Graph {
         this.evaporationRate = evaporationRate;
         this.alpha = alpha;
         this.beta = beta;
-        this.isOriented = isOriented;
 
         this.vertices = new Map<number, Vertex>();
         this.edges = new Map<number, Edge>();
@@ -54,11 +52,27 @@ export class Graph {
     }
 
     /**
+     * Get the vertices of this graph as an array
+     * @return Vertex[] vertices array
+     */
+    public getVertices(): Vertex[] {
+        return Array.from(this.vertices.values());
+    }
+
+    /**
      * Get the total number of vertices
      * @return number total number of vertices
      */
     public getTotalVertices(): number {
-        return Array.from(this.vertices.values()).length;
+        return this.getVertices().length;
+    }
+
+    /**
+     * Get the edges of this graph as an array
+     * @return Edge[] edges array
+     */
+    public getEdges(): Edge[] {
+        return Array.from(this.edges.values());
     }
 
     /**
@@ -66,8 +80,7 @@ export class Graph {
      * @return number number of edges
      */
     public getTotalEdges(): number {
-        const length = Array.from(this.edges.values()).length;
-        return this.isOriented ? length : length / 2;
+        return this.getEdges().length;
     }
 
     /**
@@ -102,54 +115,48 @@ export class Graph {
     }
 
     /**
-     * Get the list of vertices of this graph
-     * @return Vertex[] vertices array
-     */
-    public getVertices(): Vertex[] {
-        return Array.from(this.vertices.values());
-    }
-
-    /**
      * Connect the two vertices with a edge
-     * @param from
-     * @param to
+     * @param first Vertex
+     * @param second Vertex
      * @param pheromones
      * @return created Edge
      */
-    public addEdge(from: Vertex, to: Vertex, pheromones: number = 0.1): Edge {
-        const edge = new Edge(from, to, pheromones);
-        this.edges.set(edge.hash(), edge);
-
-        // create the opposite edge if it's not an oriented graph
-        if (!this.isOriented) {
-            const oppositeEdge = new Edge(to, from, pheromones);
-            this.edges.set(oppositeEdge.hash(), oppositeEdge);
+    public addEdge(first: Vertex, second: Vertex, pheromones: number = 0.1): Edge {
+        const edge = new Edge(first, second, pheromones);
+        if (!this.edges.has(edge.hash())) {
+            this.edges.set(edge.hash(), edge);
         }
 
         return edge;
     }
 
     /**
-     * Get the edges connected to a graph
-     * @param vertex Vertex
-     * @return edges Edge[]
+     * Remove an edge from the graph
+     * @param edge
+     * @return boolean true if the edge was removed, false otherwise
      */
-    public getEdges(vertex: Vertex): Edge[] {
-        return Array.from(this.edges.values()).filter((E) => E.getFirst() === vertex);
+    public removeEdge(edge: Edge): boolean {
+        return this.edges.delete(edge.hash());
     }
 
     /**
-     * Return the graph properties as a string
-     * @return string Graph properties
+     * Returns the edges connected to a vertex
+     * @param vertex
      */
-    public toString(): string {
-        let str = "VERTICES : \n";
+    public getEdgesForVertex(vertex: Vertex) {
+        return this.getEdges().filter((e) => e.getFirst() === vertex || e.getSecond() === vertex);
+    }
 
-        this.vertices.forEach((v) => {
-            str += "\t" + v.getName() + "\n";
+    /**
+     * Get the edge between two vertices
+     * @param first
+     * @param second
+     */
+    public getEdgeBetweenVertices(first: Vertex, second: Vertex): Edge|undefined {
+        return this.getEdges().find((e) => {
+            return e.getFirst() === first && e.getSecond() === second ||
+                e.getFirst() === second && e.getSecond() === first;
         });
-
-        return str;
     }
 
     /**
@@ -159,33 +166,30 @@ export class Graph {
     public updatePheromone(ant: Ant): void {
         const tour: Vertex[] = ant.getTour();
         const evaluation: number = ant.evaluate();
-        const probability: number = (1 / this.evaporationRate);
+        const evaporationRateDecay: number = (100 - this.evaporationRate) / 100;
 
         const hashSet: Set<Edge> = new Set();
 
         // update pheromones for every edges on the tour
         for (let i = 1; i < tour.length; i++) {
-            const edge1: Edge = this.getEdges(tour[i - 1])[0];
-            const edge2: Edge = this.getEdges(tour[i])[0];
+            const edge = this.getEdgeBetweenVertices(tour[i - 1], tour[i]);
 
-            // The pheromones.
-            const p1: number = edge1.getPheromone();
-            const p2: number = edge2.getPheromone();
+            if (edge !== undefined) {
+                const currentPheromones: number = edge.getPheromone();
 
-            hashSet.add(edge1);
-            hashSet.add(edge2);
+                hashSet.add(edge);
 
-            edge1.setPheromone(probability * p1 + 1.0 / evaluation);
-            edge2.setPheromone(probability * p2 + 1.0 / evaluation);
+                const newValue = evaporationRateDecay * currentPheromones + 1 / (evaluation * 0.1);
+
+                edge.setPheromone(newValue);
+            }
         }
 
         // Evaporate the pheromones on all the rest of the edges.
-        for (const vertex of this.getVertices()) {
-            for (const edge of this.getEdges(vertex)) {
-                if (!hashSet.has(edge)) {
-                    const p: number = edge.getPheromone();
-                    edge.setPheromone(probability * p);
-                }
+        for (const edge of this.getEdges()) {
+            if (!hashSet.has(edge)) {
+                const p: number = edge.getPheromone();
+                edge.setPheromone(p * evaporationRateDecay);
             }
         }
     }
