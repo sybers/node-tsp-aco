@@ -5,12 +5,12 @@ import { Graph } from "../index";
 describe("Graph", () => {
     describe("isEmpty", () => {
         it("should return true if the graph is empty", () => {
-            const emptyGraph = new Graph(0.1, 1, 1);
+            const emptyGraph = new Graph();
             expect(emptyGraph.isEmpty()).to.be.true;
         });
 
         it("should return false if the graph has some elements", () => {
-            const graph = new Graph(0.1, 1, 1);
+            const graph = new Graph();
             graph.addVertex("name", 0, 0);
             expect(graph.isEmpty()).to.be.false;
         });
@@ -18,10 +18,10 @@ describe("Graph", () => {
 
     describe("getTotalVertices", () => {
         it("should return the total number of vertices in the graph", () => {
-            const g = new Graph(0.1, 1, 1);
+            const g = new Graph();
             expect(g.getTotalVertices()).to.equal(0);
 
-            const g2 = new Graph(0.1, 1, 1);
+            const g2 = new Graph();
             g2.addVertex("A", 0, 0);
             g2.addVertex("B", 1, 1);
             expect(g2.getTotalVertices()).to.equal(2);
@@ -31,11 +31,11 @@ describe("Graph", () => {
     describe("getTotalEdges", () => {
         it("should return the total number of edges on the graph", () => {
             // empty graph has no edges
-            const g = new Graph(0.1, 1, 1);
+            const g = new Graph();
             expect(g.getTotalEdges()).to.equal(0);
 
             // a graph with one edge
-            const g2 = new Graph(0.1, 1, 1);
+            const g2 = new Graph();
 
             const v1 = g2.addVertex("A", 0, 0);
             const v2 = g2.addVertex("B", 1, 1);
@@ -45,7 +45,7 @@ describe("Graph", () => {
         });
 
         it("should skip an edge that already exists", () => {
-            const g = new Graph(0.1, 1, 1);
+            const g = new Graph();
 
             const v1 = g.addVertex("A", 0, 0);
             const v2 = g.addVertex("B", 1, 1);
@@ -60,7 +60,7 @@ describe("Graph", () => {
 
     describe("getEdgesForVertex", () => {
         it("should return the edges connected to a vertex", () => {
-            const g = new Graph(0.1, 1, 1);
+            const g = new Graph();
 
             const a = g.addVertex("A", 0, 0);
             const b = g.addVertex("B", 0, 1);

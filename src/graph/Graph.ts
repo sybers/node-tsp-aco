@@ -1,4 +1,3 @@
-import { Ant } from "../tsp/";
 import { Edge } from "./Edge";
 import { Vertex } from "./Vertex";
 
@@ -14,41 +13,13 @@ import { Vertex } from "./Vertex";
 export class Graph {
     private readonly vertices: Map<number, Vertex>;
     private readonly edges: Map<number, Edge>;
-    // @ts-ignore
-    private readonly evaporationRate: number;
-    private readonly alpha: number;
-    private readonly beta: number;
 
     /**
      * Create a new graph with the given parameters
-     * @param evaporationRate
-     * @param alpha
-     * @param beta
-     * @param isOriented
      */
-    constructor(evaporationRate: number, alpha: number, beta: number, isOriented: boolean = false) {
-        this.evaporationRate = evaporationRate;
-        this.alpha = alpha;
-        this.beta = beta;
-
+    constructor() {
         this.vertices = new Map<number, Vertex>();
         this.edges = new Map<number, Edge>();
-    }
-
-    /**
-     * Get alpha value
-     * @return number alpha
-     */
-    public getAlpha(): number {
-        return this.alpha;
-    }
-
-    /**
-     * Get beta value
-     * @return number beta
-     */
-    public getBeta(): number {
-        return this.beta;
     }
 
     /**
@@ -157,40 +128,5 @@ export class Graph {
             return e.getFirst() === first && e.getSecond() === second ||
                 e.getFirst() === second && e.getSecond() === first;
         });
-    }
-
-    /**
-     * Update the pheromones on the graph for the given ant
-     * @param ant Ant the ant for which to update the pheromones
-     */
-    public updatePheromone(ant: Ant): void {
-        const tour: Vertex[] = ant.getTour();
-        const evaluation: number = ant.evaluate();
-        const evaporationRateDecay: number = (100 - this.evaporationRate) / 100;
-
-        const hashSet: Set<Edge> = new Set();
-
-        // update pheromones for every edges on the tour
-        for (let i = 1; i < tour.length; i++) {
-            const edge = this.getEdgeBetweenVertices(tour[i - 1], tour[i]);
-
-            if (edge !== undefined) {
-                const currentPheromones: number = edge.getPheromone();
-
-                hashSet.add(edge);
-
-                const newValue = evaporationRateDecay * currentPheromones + 1 / (evaluation * 0.1);
-
-                edge.setPheromone(newValue);
-            }
-        }
-
-        // Evaporate the pheromones on all the rest of the edges.
-        for (const edge of this.getEdges()) {
-            if (!hashSet.has(edge)) {
-                const p: number = edge.getPheromone();
-                edge.setPheromone(p * evaporationRateDecay);
-            }
-        }
     }
 }

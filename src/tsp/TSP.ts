@@ -1,4 +1,4 @@
-import { Graph } from "../graph";
+import { Graph, Vertex } from "../graph";
 import { Ant } from "./Ant";
 
 /**
@@ -7,10 +7,43 @@ import { Ant } from "./Ant";
  */
 export  class TSP {
     private readonly graph: Graph;
+    private readonly alpha: number;
+    private readonly beta: number;
+    private readonly evaporationRate: number;
     private readonly antsNumber: number;
     private readonly generationsNumber: number;
 
-    public constructor(graph: Graph, ants: number, generations: number) {
+    public constructor(
+        graph: Graph,
+        alpha: number,
+        beta: number,
+        evaporationRate: number,
+        ants: number,
+        generations: number,
+    ) {
+        if (alpha < 0) {
+            throw new Error("alpha parameter must be >= 0");
+        }
+
+        if (beta < 0) {
+            throw new Error("alpha parameter must be >= 0");
+        }
+
+        if (evaporationRate > 1 || evaporationRate < 0) {
+            throw new Error("EvaporationRate parameter must be >= 0 and <= 1");
+        }
+
+        if (ants <= 0) {
+            throw new Error("ants parameter must be greater than 0");
+        }
+
+        if (generations <= 0) {
+            throw new Error("generations parameter must be greater than 0");
+        }
+
+        this.alpha = alpha;
+        this.beta = beta;
+        this.evaporationRate = evaporationRate;
         this.antsNumber = ants;
         this.generationsNumber = generations;
         this.graph = graph;
@@ -19,25 +52,31 @@ export  class TSP {
     /**
      * Run the TSP with ACO
      */
-    public run(): number {
+    public run(generationFinishedHandler?: (generation: number, bestTour: number) => void):
+        { value: number, vertices: Vertex[] } {
         let bestAnt: Ant|null = null;
 
         // do the ACO for the chosen number of generations with the chosen number of ants each time
         for (let i = 0; i < this.generationsNumber; i++) {
-            console.log(`Generation ${i + 1} :`);
-
             const ants: Ant[] = this.createAnts(this.antsNumber);
 
             const bestAntOfGeneration: Ant|null = this.updateAntsPositions(ants);
-            this.updatePheromones(ants);
+            this.updateAllPheromones(ants);
 
-            if (bestAnt === null || (bestAntOfGeneration as Ant).evaluate() < bestAnt.evaluate()) {
+            if (bestAnt === null || bestAntOfGeneration!.evaluate() < bestAnt.evaluate()) {
                 bestAnt = bestAntOfGeneration;
-                console.log("Found better score ! (", (bestAnt as Ant).evaluate(), ")");
+            }
+
+            // callback
+            if (generationFinishedHandler) {
+                generationFinishedHandler(i + 1, bestAntOfGeneration!.evaluate());
             }
         }
 
-        return (bestAnt as Ant).evaluate();
+        return {
+            value: bestAnt!.evaluate(),
+            vertices: bestAnt!.getTour(),
+        };
     }
 
     /**
@@ -46,7 +85,7 @@ export  class TSP {
      */
     private createAnts(amount: number): Ant[] {
         return Array(amount).fill(0).map(() => {
-            return new Ant(this.graph);
+            return new Ant(this.graph, this.alpha, this.beta);
         });
     }
 
@@ -60,10 +99,7 @@ export  class TSP {
         // make all ants travel on the graph one by one
         for (const ant of ants) {
             // walk the graph until all cities are visited
-            // console.log(`Ant at index ${i} is now travelling\n`);
             while (!ant.isTravelFinished()) {
-                // console.log(ant.getTour());
-                // console.log("\n");
                 ant.travel();
             }
 
@@ -75,13 +111,34 @@ export  class TSP {
     }
 
     /**
-     * Update the pheromonse on the graphes for the ants that have completed their tour
+     * Update the pheromonse on the graph for the ants that have completed their tour
      * @param ants
      */
-    private updatePheromones(ants: Ant[]): void {
+    private updateAllPheromones(ants: Ant[]): void {
         for (const ant of ants) {
-            // console.log("Updating pheromones...");
-            this.graph.updatePheromone(ant);
+            this.updatePheromones(ant);
+        }
+    }
+
+    /**
+     * Update the pheromones of a single ant
+     * @param ant
+     */
+    private updatePheromones(ant: Ant): void {
+        const tour: Vertex[] = ant.getTour();
+        const tourLength: number = ant.evaluate();
+
+        // update pheromones for every edges on the tour
+        for (let i = 1; i < tour.length; i++) {
+            const edge = this.graph.getEdgeBetweenVertices(tour[i - 1], tour[i]);
+
+            if (edge !== undefined) {
+                const currentPheromones: number = edge.getPheromone();
+
+                const newValue = ( 1 - this.evaporationRate) * currentPheromones + 1 / tourLength;
+
+                edge.setPheromone(newValue);
+            }
         }
     }
 }

@@ -3,14 +3,17 @@ import { Tuple } from "../Tuple.type";
 
 export class Ant {
     private graph: Graph;
-    // @ts-ignore
     private currentVertex: Vertex;
+    private readonly alpha: number;
+    private readonly beta: number;
 
     private visitedVertices: Set<Vertex>;
     private readonly tour: Vertex[];
 
-    constructor(graph: Graph) {
+    constructor(graph: Graph, alpha: number, beta: number) {
         this.graph = graph;
+        this.alpha = alpha;
+        this.beta = beta;
 
         this.currentVertex = this.graph.getRandomVertex(); // randomly place ant on the graph
         this.visitedVertices = new Set<Vertex>();
@@ -81,7 +84,7 @@ export class Ant {
 
         for (const tuple of probs) {
             if (r <= tuple[0]) {
-                return tuple[1].getOppositeEnd(this.currentVertex);;
+                return tuple[1].getOppositeEnd(this.currentVertex);
             }
         }
 
@@ -130,10 +133,10 @@ export class Ant {
      * @param edge
      */
     private desirability(edge: Edge): number {
-        const pheromone: number = Math.pow(edge.getPheromone(), this.graph.getAlpha());
+        const pheromone: number = Math.pow(edge.getPheromone(), this.alpha);
 
         const distance: number = Vertex.distance(edge.getFirst(), edge.getSecond());
-        const distanceValue: number = Math.pow(1 / distance, this.graph.getBeta());
+        const distanceValue: number = Math.pow(1 / distance, this.beta);
         return pheromone * distanceValue;
     }
 }
