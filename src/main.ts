@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 "use strict";
 
-import program from "commander";
 import chalk from "chalk";
+import program from "commander";
 import ora from "ora";
 import { Graph } from "./graph";
 import interactive from "./interactive";
@@ -116,7 +116,7 @@ const main = async () => {
     const spinner = ora();
     spinner.start();
     const best = tsp.run((generation, bestTour) => {
-        spinner.text = `Generation ${chalk.bold.cyan(generation)} of ${chalk.bold.cyan(options.generations)}, best Tour : ${chalk.red("" + bestTour)}`;
+        spinner.text = `Generation ${chalk.bold.cyan(String(generation))} of ${chalk.bold.cyan(options.generations)}, best Tour : ${chalk.red("" + bestTour)}`;
         spinner.render();
     });
     spinner.succeed(chalk.green(`Finished, best tour length is ${best.value}`));

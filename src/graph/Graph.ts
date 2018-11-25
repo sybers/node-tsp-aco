@@ -114,7 +114,7 @@ export class Graph {
      * Returns the edges connected to a vertex
      * @param vertex
      */
-    public getEdgesForVertex(vertex: Vertex) {
+    public getEdgesForVertex(vertex: Vertex): Edge[] {
         return this.getEdges().filter((e) => e.getFirst() === vertex || e.getSecond() === vertex);
     }
 
