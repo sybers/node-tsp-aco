@@ -2,41 +2,49 @@
 
 This project is a **Node.js** implementation of the **Ant System algorithm** proposed by M. Dorigo et al.
 
-The main goal of this project was to produce a functional implementation of this algorithm and to test it against real world data to compare performance and accuracy of the algorithm. It was also a nice way to learn the basics of the Go language !
+The main goal of this project was to produce a functional implementation of this algorithm and to test it against real world data to compare performance and accuracy of the algorithm.
 
 > There's also a **Go** implementation available [here](https://github.com/dzetah/go-tsp-aco)!
 
 ## Installation
 
-Download the [latest](https://github.com/Gramatiik/go-tsp-aco/releases/latest) version for macOS under the [releases section](https://github.com/Gramatiik/go-tsp-aco/releases)
-
-### Build from source
-
-> To build from source, you will need the [go](https://golang.org/doc/install) compiler and the [vgo](https://github.com/golang/vgo) tool 
-
 Clone this repository and move to the sources directory
 
 ```console
-$ git clone <repository-url> go-tsp-aco
-$ cd go-tsp-aco
+$ git clone https://github.com/dzetah/node-tsp-aco.git node-tsp-aco
+$ cd node-tsp-aco
 ```
 
-```console
-$ vgo build
+Install dependencies
+
+```
+$ npm i
 ```
 
-And _voilà_ ! The compiler generated a binary named `go-tsp-aco` 🚀
+Transpile Typescript sources
+
+```
+$ npm run build
+```
+
+Run the TSP solver ! 🚀
+
+```
+$ node ./build/main.js
+```
 
 ## Usage
 
 The following flags are available :
-- `-input` : loads the given `.tsp` file.
-- `-alpha` : value of the alpha parameter.
-- `-beta` : value of the beta parameter.
-- `-ants` : number of ants per generations.
-- `-generations` : number of generations to simulate.
-- `-evaporation` : value for the pheromones evaporation rate.
-- `-h or --help` : displays the help message.
+- `-i`, `--interactive` : Interactive mode.
+- `-a`, `--ants <value>` : Number of ants (default `25`).
+- `-A`, `--alpha <value>` : Alpha value (default `1`).
+- `-B`, `--beta <value>` : Beta value (default `5`).
+- `-g`, `--generations <value>` : Number of generations (default `10`).
+- `-e`, `--evaporation <value>` Evaporation rate (default `0.5`).
+- `-h`, `--help` : displays the help message.
+
+The **Node.js** version is not yet able to read `.tsp` files and uses the [Oliver30 dataset](https://stevedower.id.au/blog/research/oliver-30/) by default.
 
 ## Licence
 
