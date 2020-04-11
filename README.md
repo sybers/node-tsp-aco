@@ -1,4 +1,6 @@
-# TSP solver using Ant Colony Optimization
+# node-tsp-aco
+
+> TSP solver using Ant Colony Optimization
 
 This project is a **Node.js** implementation of the **Ant System algorithm** proposed by M. Dorigo et al.
 
